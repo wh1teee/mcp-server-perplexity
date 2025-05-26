@@ -1,21 +1,24 @@
-FROM node:22.12-alpine AS builder
+FROM node:22-alpine AS base
 
-COPY . /app
-
-WORKDIR /app
-
-RUN --mount=type=cache,target=/root/.npm npm install
-
-FROM node:22-alpine AS release
+FROM base AS deps
 
 WORKDIR /app
 
-COPY --from=builder /app/dist /app/dist
-COPY --from=builder /app/package.json /app/package.json
-COPY --from=builder /app/package-lock.json /app/package-lock.json
+COPY package.json pnpm-lock.yaml* ./
+RUN corepack enable pnpm && pnpm i --frozen-lockfile --ignore-scripts;
 
+FROM base AS builder
+
+WORKDIR /app
+
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+RUN corepack enable pnpm && pnpm run build;
+
+FROM base AS runner
+
+WORKDIR /app
 ENV NODE_ENV=production
-
-RUN npm ci --ignore-scripts --omit-dev
+COPY --from=builder /app/dist ./dist
 
 ENTRYPOINT ["node", "dist/index.js"]

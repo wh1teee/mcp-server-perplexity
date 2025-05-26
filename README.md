@@ -39,9 +39,17 @@ git clone git@github.com:ppl-ai/modelcontextprotocol.git
 
 Navigate to the `perplexity-ask` directory and install the necessary dependencies:
 
+**Using pnpm (recommended):**
 ```bash
-cd modelcontextprotocol/perplexity-ask && npm install
+cd modelcontextprotocol/perplexity-ask && pnpm install
 ```
+
+**Installing pnpm (if not already installed):**
+```bash
+npm install -g pnpm
+```
+
+Or use alternative installation methods from [pnpm documentation](https://pnpm.io/installation).
 
 ### Step 2: Get a Sonar API Key
 
