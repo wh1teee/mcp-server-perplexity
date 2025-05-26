@@ -49,6 +49,13 @@ cd modelcontextprotocol/perplexity-ask && npm install
 2. Follow the account setup instructions and generate your API key from the developer dashboard.
 3. Set the API key in your environment as `PERPLEXITY_API_KEY`.
 
+### Step 2.1: Configure Base URL (Optional)
+
+The server supports configuring a custom base URL for the Perplexity API through the `BASE_URL` environment variable. This is useful for api providers like oipenrouter.
+
+**Default behavior**: If not set, the server uses `https://api.perplexity.ai/chat/completions`
+
+
 ### Step 3: Configure Claude Desktop
 
 1. Download Claude desktop [here](https://claude.ai/download). 
@@ -66,10 +73,13 @@ cd modelcontextprotocol/perplexity-ask && npm install
         "--rm",
         "-e",
         "PERPLEXITY_API_KEY",
+        "-e",
+        "BASE_URL",
         "mcp/perplexity-ask"
       ],
       "env": {
-        "PERPLEXITY_API_KEY": "YOUR_API_KEY_HERE"
+        "PERPLEXITY_API_KEY": "YOUR_API_KEY_HERE",
+        "BASE_URL": "https://api.perplexity.ai/chat/completions"
       }
     }
   }
@@ -88,7 +98,8 @@ cd modelcontextprotocol/perplexity-ask && npm install
         "server-perplexity-ask"
       ],
       "env": {
-        "PERPLEXITY_API_KEY": "YOUR_API_KEY_HERE"
+        "PERPLEXITY_API_KEY": "YOUR_API_KEY_HERE",
+        "BASE_URL": "https://api.perplexity.ai/chat/completions"
       }
     }
   }
