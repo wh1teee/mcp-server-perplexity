@@ -1,50 +1,46 @@
 #!/bin/bash
 
-# Скрипт для релиза mcp-server-perplexity
+# Script for releasing mcp-server-perplexity
 
 set -e
 
-echo "🚀 Начинаем процесс релиза..."
+echo "🚀 Starting release process..."
 
-# Проверяем, что мы в правильной директории
+# Make sure we are in the correct directory
 if [ ! -f "perplexity-ask/package.json" ]; then
-    echo "❌ Ошибка: запустите скрипт из корневой директории проекта"
+    echo "❌ Error: please run this script from the root directory of the project"
     exit 1
 fi
 
-# Переходим в директорию пакета
+# Move to the package directory
 cd perplexity-ask
 
-echo "📝 Проверяем статус git..."
-if [ -n "$(git status --porcelain)" ]; then
-    echo "❌ Ошибка: есть незафиксированные изменения"
-    echo "Сначала сделайте commit всех изменений"
-    exit 1
-fi
+echo "📝 Checking git status..."
 
-echo "📦 Устанавливаем зависимости..."
-npm ci
 
-echo "🔨 Собираем проект..."
-npm run build
+echo "📦 Installing dependencies..."
+pnpm i
 
-echo "🧪 Проверяем, что проект собирается корректно..."
+echo "🔨 Building the project..."
+pnpm run build
+
+echo "🧪 Checking if the project built correctly..."
 if [ ! -f "dist/index.js" ]; then
-    echo "❌ Ошибка: файл dist/index.js не найден после сборки"
+    echo "❌ Error: dist/index.js not found after build"
     exit 1
 fi
 
-echo "📋 Текущая версия:"
+echo "📋 Current version:"
 npm version --json
 
 echo ""
-echo "Выберите тип релиза:"
+echo "Choose release type:"
 echo "1) patch (0.1.0 -> 0.1.1)"
-echo "2) minor (0.1.0 -> 0.2.0)"  
+echo "2) minor (0.1.0 -> 0.2.0)"
 echo "3) major (0.1.0 -> 1.0.0)"
-echo "4) Отмена"
+echo "4) Cancel"
 
-read -p "Введите номер (1-4): " choice
+read -p "Enter number (1-4): " choice
 
 case $choice in
     1)
@@ -57,40 +53,40 @@ case $choice in
         VERSION_TYPE="major"
         ;;
     4)
-        echo "🚫 Релиз отменен"
+        echo "🚫 Release canceled"
         exit 0
         ;;
     *)
-        echo "❌ Неверный выбор"
+        echo "❌ Invalid choice"
         exit 1
         ;;
 esac
 
-echo "📈 Обновляем версию ($VERSION_TYPE)..."
+echo "📈 Updating version ($VERSION_TYPE)..."
 NEW_VERSION=$(npm version $VERSION_TYPE --no-git-tag-version)
 
-echo "✅ Новая версия: $NEW_VERSION"
+echo "✅ New version: $NEW_VERSION"
 
-# Возвращаемся в корневую директорию для git операций
+# Go back to the root directory for git operations
 cd ..
 
-echo "📝 Создаем commit..."
-git add perplexity-ask/package.json perplexity-ask/package-lock.json
+echo "📝 Creating commit..."
+git add perplexity-ask/package.json perplexity-ask/pnpm-lock.yaml
 git commit -m "chore: bump version to $NEW_VERSION"
 
-echo "🏷️  Создаем тег..."
+echo "🏷️  Creating tag..."
 git tag -a "$NEW_VERSION" -m "Release $NEW_VERSION"
 
-echo "⬆️  Отправляем изменения..."
+echo "⬆️  Pushing changes..."
 git push origin main
 git push origin "$NEW_VERSION"
 
 echo ""
-echo "🎉 Релиз успешно создан!"
-echo "📦 Версия: $NEW_VERSION"
-echo "🏷️  Тег: $NEW_VERSION"
+echo "🎉 Release created successfully!"
+echo "📦 Version: $NEW_VERSION"
+echo "🏷️  Tag: $NEW_VERSION"
 echo ""
-echo "Теперь:"
-echo "1. GitHub Actions автоматически опубликует пакет на npm"
-echo "2. Будет создан релиз на GitHub"
-echo "3. Проверьте статус в разделе Actions вашего репозитория" 
+echo "Now:"
+echo "1. GitHub Actions will automatically publish the package to npm"
+echo "2. A release will be created on GitHub"
+echo "3. Check the status in the Actions tab of your repository"
