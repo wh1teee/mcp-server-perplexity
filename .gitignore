@@ -59,7 +59,6 @@ Desktop.ini
 *.jsonl
 :
 
-scripts/
 tasks/
 .taskmasterconfig
 perplexity-ask/dist/

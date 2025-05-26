@@ -1,5 +1,5 @@
 {
-  "name": "server-perplexity-ask",
+  "name": "mcp-server-perplexity",
   "version": "0.2.0",
   "description": "MCP server for Perplexity API integration",
   "keywords": [
@@ -8,20 +8,20 @@
     "mcp",
     "modelcontextprotocol"
   ],
-  "homepage": "https://modelcontextprotocol.io",
+  "homepage": "https://github.com/wh1teee/mcp-server-perplexity",
   "bugs": {
-    "url": "https://github.com/modelcontextprotocol/servers/issues"
+    "url": "https://github.com/wh1teee/mcp-server-perplexity/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/modelcontextprotocol/servers.git"
+    "url": "git+https://github.com/wh1teee/mcp-server-perplexity.git"
   },
   "license": "MIT",
-  "author": "Model Context Protocol (https://modelcontextprotocol.io)",
+  "author": "wh1teee",
   "type": "module",
   "main": "dist/index.js",
   "bin": {
-    "mcp-server-perplexity-ask": "dist/index.js"
+    "mcp-server-perplexity": "dist/index.js"
   },
   "files": [
     "dist"
@@ -29,7 +29,9 @@
   "scripts": {
     "build": "tsc && shx chmod +x dist/*.js",
     "prepare": "pnpm run build",
-    "watch": "tsc --watch"
+    "watch": "tsc --watch",
+    "prepublishOnly": "npm run build",
+    "release": "npm version patch && npm publish && git push && git push --tags"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.0",
