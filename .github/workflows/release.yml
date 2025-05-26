@@ -27,6 +27,7 @@ jobs:
         with:
           node-version: '22'
           cache: 'pnpm'
+          cache-dependency-path: 'perplexity-ask/pnpm-lock.yaml'
           registry-url: 'https://registry.npmjs.org'
 
       - name: Install dependencies
