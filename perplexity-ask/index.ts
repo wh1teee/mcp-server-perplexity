@@ -124,6 +124,12 @@ if (!PERPLEXITY_API_KEY) {
   process.exit(1);
 }
 
+const BASE_URL = process.env.BASE_URL;
+if (!BASE_URL) {
+  console.error("Error: BASE_URL environment variable is required");
+  process.exit(1);
+}
+
 /**
  * Performs a chat completion by sending a request to the Perplexity API.
  * Appends citations to the returned message content if they exist.
@@ -138,7 +144,7 @@ async function performChatCompletion(
   model: string = "sonar-pro"
 ): Promise<string> {
   // Construct the API endpoint URL and request body
-  const url = new URL("https://api.perplexity.ai/chat/completions");
+  const url = new URL(BASE_URL!);
   const body = {
     model: model, // Model identifier passed as parameter
     messages: messages,
