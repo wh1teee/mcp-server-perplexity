@@ -29,11 +29,19 @@ venv/
 .vscode/
 *.swp
 *.swo
+.cursor/
 
 # Ignore dependency and build artifacts
 node_modules/
 npm-debug.log
 yarn-error.log
+
+# Ignore npm lockfile (using pnpm instead)
+package-lock.json
+
+# Ignore pnpm specific files
+.pnpm-debug.log*
+.pnpm-store/
 
 # Ignore coverage and test reports
 .coverage
@@ -50,3 +58,8 @@ Desktop.ini
 *.tsv
 *.jsonl
 :
+
+scripts/
+tasks/
+.taskmasterconfig
+perplexity-ask/dist/
