@@ -9,30 +9,37 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v4
+        with:
+          version: latest
+          run_install: false
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '22'
+          cache: 'pnpm'
           registry-url: 'https://registry.npmjs.org'
 
       - name: Install dependencies
-        run: |
-          cd perplexity-ask
-          npm ci
+        working-directory: ./perplexity-ask
+        run: pnpm install --frozen-lockfile
 
       - name: Build
-        run: |
-          cd perplexity-ask
-          npm run build
+        working-directory: ./perplexity-ask
+        run: pnpm run build
 
       - name: Publish to npm
-        run: |
-          cd perplexity-ask
-          npm publish
+        working-directory: ./perplexity-ask
+        run: pnpm publish --access public --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
