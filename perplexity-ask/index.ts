@@ -308,8 +308,17 @@ async function performChatCompletion(
     throw new Error(`Failed to parse JSON response from Perplexity API: ${jsonError}`);
   }
 
-  // Directly retrieve the main message content from the response 
-  let messageContent = data.choices[0].message.content;
+  // Safely retrieve the main message content from the response
+  if (!data.choices || !Array.isArray(data.choices) || data.choices.length === 0) {
+    throw new Error("Invalid API response: missing or empty choices array");
+  }
+  
+  const choice = data.choices[0];
+  if (!choice.message || typeof choice.message.content !== 'string') {
+    throw new Error("Invalid API response: missing or invalid message content");
+  }
+  
+  let messageContent = choice.message.content;
 
   // If citations are provided, append them to the message content
   if (data.citations && Array.isArray(data.citations) && data.citations.length > 0) {
@@ -331,8 +340,10 @@ async function performChatCompletion(
   if (data.images && Array.isArray(data.images) && data.images.length > 0) {
     messageContent += "\n\nRelevant Images:\n";
     data.images.forEach((image: any, index: number) => {
-      messageContent += `[${index + 1}] ${image.title || 'Image'}: ${image.url}\n`;
-      if (image.description) {
+      const title = image?.title || 'Image';
+      const url = image?.url || 'URL not available';
+      messageContent += `[${index + 1}] ${title}: ${url}\n`;
+      if (image?.description) {
         messageContent += `    Description: ${image.description}\n`;
       }
     });
