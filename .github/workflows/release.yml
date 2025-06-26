@@ -50,12 +50,17 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
+            // Extract tag name from GITHUB_REF or use a fallback
+            const tagName = process.env.GITHUB_REF.startsWith('refs/tags/') 
+              ? process.env.GITHUB_REF.replace('refs/tags/', '')
+              : 'v0.3.0';
+              
             const { data: release } = await github.rest.repos.createRelease({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              tag_name: context.ref.replace('refs/tags/', ''),
-              name: `Release ${context.ref.replace('refs/tags/', '')}`,
-              body: `## 🚀 Enhanced MCP Server v0.3.0\n\n### Major Features\n- Complete Perplexity API parameter support\n- Advanced search and reasoning controls\n- Enhanced safety and error handling\n- Developer-focused optimizations\n\n### Bug Fixes\n- Fixed image URL undefined display\n- Improved API response validation\n- Enhanced error messages\n\nSee [CLAUDE.md](https://github.com/${context.repo.owner}/${context.repo.repo}/blob/main/CLAUDE.md) for comprehensive usage guide.`,
+              tag_name: tagName,
+              name: `Release ${tagName}`,
+              body: `## 🚀 Enhanced MCP Server ${tagName}\n\n### Major Features\n- Complete Perplexity API parameter support across all tools\n- Advanced search context control (low/medium/high)\n- Reasoning effort configuration for complex queries\n- Domain filtering for focused development research\n- Academic mode for authoritative sources\n- Enhanced safety with comprehensive error handling\n\n### 🚀 Developer Experience\n- Intelligent parameter defaults optimized for development\n- Comprehensive documentation and usage examples\n- Type-safe implementation with full validation\n- Related questions and visual content support\n\n### 🐛 Bug Fixes\n- Fixed undefined image URL display issues\n- Added robust API response validation\n- Improved error messages and edge case handling\n- Fixed GitHub Actions npm authentication\n\n### 🏢 Architecture\n- Enhanced MCP tool schemas with rich parameter descriptions\n- Backward compatible with existing implementations\n- Optimized for development assistance workflows\n\nSee [CLAUDE.md](https://github.com/${context.repo.owner}/${context.repo.repo}/blob/main/CLAUDE.md) for comprehensive usage guide.`,
               draft: false,
               prerelease: false
             });
