@@ -1,6 +1,6 @@
 {
   "name": "mcp-server-perplexity",
-  "version": "0.2.4",
+  "version": "0.3.0",
   "description": "Enhanced MCP server with comprehensive Perplexity API parameter support for advanced development assistance",
   "keywords": [
     "ai",
