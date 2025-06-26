@@ -27,8 +27,10 @@ jobs:
         with:
           node-version: '22'
           cache: 'pnpm'
-          cache-dependency-path: 'perplexity-ask/pnpm-lock.yaml'
+          cache-dependency-path: './perplexity-ask/pnpm-lock.yaml'
           registry-url: 'https://registry.npmjs.org'
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Install dependencies
         working-directory: ./perplexity-ask
@@ -45,14 +47,16 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Create GitHub Release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: actions/github-script@v7
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
-          body: |
-            Changes in this Release
-            - Bug fixes and performance improvements
-          draft: false
-          prerelease: false 
+          script: |
+            const { data: release } = await github.rest.repos.createRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag_name: context.ref.replace('refs/tags/', ''),
+              name: `Release ${context.ref.replace('refs/tags/', '')}`,
+              body: `## 🚀 Enhanced MCP Server v0.3.0\n\n### Major Features\n- Complete Perplexity API parameter support\n- Advanced search and reasoning controls\n- Enhanced safety and error handling\n- Developer-focused optimizations\n\n### Bug Fixes\n- Fixed image URL undefined display\n- Improved API response validation\n- Enhanced error messages\n\nSee [CLAUDE.md](https://github.com/${context.repo.owner}/${context.repo.repo}/blob/main/CLAUDE.md) for comprehensive usage guide.`,
+              draft: false,
+              prerelease: false
+            });
+            console.log(`Created release: ${release.html_url}`) 
