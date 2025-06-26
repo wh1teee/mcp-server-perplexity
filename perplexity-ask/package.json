@@ -1,12 +1,17 @@
 {
   "name": "mcp-server-perplexity",
   "version": "0.2.4",
-  "description": "MCP server for Perplexity API integration",
+  "description": "Enhanced MCP server with comprehensive Perplexity API parameter support for advanced development assistance",
   "keywords": [
     "ai",
     "perplexity",
     "mcp",
-    "modelcontextprotocol"
+    "modelcontextprotocol",
+    "research",
+    "reasoning",
+    "search",
+    "development",
+    "assistant"
   ],
   "homepage": "https://github.com/wh1teee/mcp-server-perplexity",
   "bugs": {
@@ -34,12 +39,12 @@
     "release": "npm version patch && npm publish && git push && git push --tags"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.12.0",
-    "axios": "^1.9.0",
+    "@modelcontextprotocol/sdk": "^1.13.1",
+    "axios": "^1.10.0",
     "dotenv": "^16.5.0"
   },
   "devDependencies": {
-    "@types/node": "^20.17.50",
+    "@types/node": "^20.19.1",
     "shx": "^0.3.4",
     "typescript": "^5.8.3"
   },
