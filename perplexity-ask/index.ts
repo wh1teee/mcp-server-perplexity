@@ -16,9 +16,9 @@ import {
 const PERPLEXITY_ASK_TOOL: Tool = {
   name: "perplexity_ask",
   description:
-    "Engages in a conversation using the Sonar API. " +
-    "Accepts an array of messages (each with a role and content) " +
-    "and returns a ask completion response from the Perplexity model.",
+    "Engages in a conversation using the Sonar API with enhanced control over search and reasoning. " +
+    "Accepts messages and optional parameters to control response quality, search depth, and output format. " +
+    "Ideal for quick development questions and general coding assistance.",
   inputSchema: {
     type: "object",
     properties: {
@@ -39,6 +39,34 @@ const PERPLEXITY_ASK_TOOL: Tool = {
           required: ["role", "content"],
         },
         description: "Array of conversation messages",
+      },
+      search_context_size: {
+        type: "string",
+        enum: ["low", "medium", "high"],
+        description: "Controls search comprehensiveness. 'low' for basic queries (cost-effective), 'medium' for balanced results, 'high' for deep research and comprehensive coverage. Default: 'medium'",
+      },
+      max_tokens: {
+        type: "number",
+        minimum: 1,
+        maximum: 4000,
+        description: "Maximum number of tokens in the response. Controls response length. Typical values: 500-1500 for development questions.",
+      },
+      temperature: {
+        type: "number",
+        minimum: 0.0,
+        maximum: 2.0,
+        description: "Controls response creativity. Lower values (0.1-0.3) for precise technical answers, higher values (0.7-1.0) for creative solutions. Default: 0.2",
+      },
+      search_domain_filter: {
+        type: "array",
+        items: {
+          type: "string"
+        },
+        description: "Limit search to specific domains. Useful for development: ['github.com', 'stackoverflow.com', 'developer.mozilla.org']. Leave empty for all domains.",
+      },
+      return_related_questions: {
+        type: "boolean",
+        description: "Include follow-up question suggestions for deeper exploration. Helpful for discovering related development topics. Default: false",
       },
     },
     required: ["messages"],
@@ -52,9 +80,9 @@ const PERPLEXITY_ASK_TOOL: Tool = {
 const PERPLEXITY_RESEARCH_TOOL: Tool = {
   name: "perplexity_research",
   description:
-    "Performs deep research using the Perplexity API. " +
-    "Accepts an array of messages (each with a role and content) " +
-    "and returns a comprehensive research response with citations.",
+    "Performs comprehensive deep research using the sonar-deep-research model. " +
+    "Conducts iterative searches, reads multiple sources, and provides detailed analysis with citations. " +
+    "Perfect for architectural decisions, technology comparisons, and thorough investigation of development topics.",
   inputSchema: {
     type: "object",
     properties: {
@@ -76,6 +104,42 @@ const PERPLEXITY_RESEARCH_TOOL: Tool = {
         },
         description: "Array of conversation messages",
       },
+      reasoning_effort: {
+        type: "string",
+        enum: ["low", "medium", "high"],
+        description: "Controls research depth and reasoning complexity. 'low' for basic research, 'high' for complex architectural decisions and comprehensive analysis. Default: 'high'",
+      },
+      search_context_size: {
+        type: "string",
+        enum: ["low", "medium", "high"],
+        description: "Controls search comprehensiveness. 'high' recommended for deep research. Default: 'high'",
+      },
+      search_mode: {
+        type: "string",
+        enum: ["web", "academic"],
+        description: "Search mode: 'web' for general sources, 'academic' for peer-reviewed papers and authoritative documentation. Default: 'web'",
+      },
+      max_tokens: {
+        type: "number",
+        minimum: 1000,
+        maximum: 8000,
+        description: "Maximum response length. Research reports typically need 2000-4000 tokens for comprehensive coverage.",
+      },
+      search_domain_filter: {
+        type: "array",
+        items: {
+          type: "string"
+        },
+        description: "Focus research on specific domains. For development: ['github.com', 'docs.python.org', 'nodejs.org', 'developer.mozilla.org']",
+      },
+      return_related_questions: {
+        type: "boolean",
+        description: "Include suggestions for follow-up research topics. Useful for comprehensive project planning. Default: true",
+      },
+      return_images: {
+        type: "boolean",
+        description: "Include relevant diagrams, architecture images, and visual aids in research results. Default: false",
+      },
     },
     required: ["messages"],
   },
@@ -88,9 +152,9 @@ const PERPLEXITY_RESEARCH_TOOL: Tool = {
 const PERPLEXITY_REASON_TOOL: Tool = {
   name: "perplexity_reason",
   description:
-    "Performs reasoning tasks using the Perplexity API. " +
-    "Accepts an array of messages (each with a role and content) " +
-    "and returns a well-reasoned response using the sonar-reasoning-pro model.",
+    "Performs advanced reasoning and problem-solving using the sonar-reasoning-pro model. " +
+    "Excels at logical analysis, step-by-step problem decomposition, and complex technical decision-making. " +
+    "Ideal for debugging complex issues, algorithm design, and architectural reasoning.",
   inputSchema: {
     type: "object",
     properties: {
@@ -111,6 +175,28 @@ const PERPLEXITY_REASON_TOOL: Tool = {
           required: ["role", "content"],
         },
         description: "Array of conversation messages",
+      },
+      reasoning_effort: {
+        type: "string",
+        enum: ["low", "medium", "high"],
+        description: "Reasoning complexity level. 'high' for complex debugging and architectural decisions, 'medium' for standard problem-solving. Default: 'high'",
+      },
+      max_tokens: {
+        type: "number",
+        minimum: 500,
+        maximum: 4000,
+        description: "Maximum response length. Reasoning tasks typically need 1000-2500 tokens for detailed step-by-step analysis.",
+      },
+      temperature: {
+        type: "number",
+        minimum: 0.0,
+        maximum: 1.0,
+        description: "Controls reasoning creativity. Lower values (0.1-0.3) for logical, systematic reasoning. Higher values (0.5-0.7) for creative problem-solving approaches. Default: 0.2",
+      },
+      search_context_size: {
+        type: "string",
+        enum: ["low", "medium", "high"],
+        description: "Search context for reasoning support. 'medium' for standard reasoning, 'high' when external context is crucial. Default: 'medium'",
       },
     },
     required: ["messages"],
@@ -136,22 +222,56 @@ if (!BASE_URL) {
  *
  * @param {Array<{ role: string; content: string }>} messages - An array of message objects.
  * @param {string} model - The model to use for the completion.
+ * @param {object} options - Additional API parameters for enhanced control.
  * @returns {Promise<string>} The chat completion result with appended citations.
  * @throws Will throw an error if the API request fails.
  */
 async function performChatCompletion(
   messages: Array<{ role: string; content: string }>,
-  model: string = "sonar-pro"
+  model: string = "sonar-pro",
+  options: {
+    search_context_size?: "low" | "medium" | "high";
+    reasoning_effort?: "low" | "medium" | "high";
+    search_mode?: "web" | "academic";
+    max_tokens?: number;
+    temperature?: number;
+    search_domain_filter?: string[];
+    return_related_questions?: boolean;
+    return_images?: boolean;
+  } = {}
 ): Promise<string> {
   // Construct the API endpoint URL and request body
   const url = new URL(BASE_URL!);
-  const body = {
-    model: model, // Model identifier passed as parameter
+  const body: any = {
+    model: model,
     messages: messages,
-    // Additional parameters can be added here if required (e.g., max_tokens, temperature, etc.)
-    // See the Sonar API documentation for more details: 
-    // https://docs.perplexity.ai/api-reference/chat-completions
   };
+
+  // Add optional parameters if provided
+  if (options.search_context_size) {
+    body.search_context_size = options.search_context_size;
+  }
+  if (options.reasoning_effort) {
+    body.reasoning_effort = options.reasoning_effort;
+  }
+  if (options.search_mode) {
+    body.search_mode = options.search_mode;
+  }
+  if (options.max_tokens) {
+    body.max_tokens = options.max_tokens;
+  }
+  if (options.temperature !== undefined) {
+    body.temperature = options.temperature;
+  }
+  if (options.search_domain_filter && options.search_domain_filter.length > 0) {
+    body.search_domain_filter = options.search_domain_filter;
+  }
+  if (options.return_related_questions !== undefined) {
+    body.return_related_questions = options.return_related_questions;
+  }
+  if (options.return_images !== undefined) {
+    body.return_images = options.return_images;
+  }
 
   let response;
   try {
@@ -199,6 +319,25 @@ async function performChatCompletion(
     });
   }
 
+  // If related questions are provided, append them
+  if (data.related_questions && Array.isArray(data.related_questions) && data.related_questions.length > 0) {
+    messageContent += "\n\nRelated Questions:\n";
+    data.related_questions.forEach((question: string, index: number) => {
+      messageContent += `${index + 1}. ${question}\n`;
+    });
+  }
+
+  // If images are provided, append them
+  if (data.images && Array.isArray(data.images) && data.images.length > 0) {
+    messageContent += "\n\nRelevant Images:\n";
+    data.images.forEach((image: any, index: number) => {
+      messageContent += `[${index + 1}] ${image.title || 'Image'}: ${image.url}\n`;
+      if (image.description) {
+        messageContent += `    Description: ${image.description}\n`;
+      }
+    });
+  }
+
   return messageContent;
 }
 
@@ -241,9 +380,17 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         if (!Array.isArray(args.messages)) {
           throw new Error("Invalid arguments for perplexity_ask: 'messages' must be an array");
         }
-        // Invoke the chat completion function with the provided messages
         const messages = args.messages;
-        const result = await performChatCompletion(messages, "sonar-pro");
+        const options: any = {};
+        if (args.search_context_size) options.search_context_size = args.search_context_size;
+        else options.search_context_size = "medium";
+        if (args.max_tokens) options.max_tokens = args.max_tokens;
+        if (args.temperature !== undefined) options.temperature = args.temperature;
+        else options.temperature = 0.2;
+        if (args.search_domain_filter) options.search_domain_filter = args.search_domain_filter;
+        if (args.return_related_questions !== undefined) options.return_related_questions = args.return_related_questions;
+        else options.return_related_questions = false;
+        const result = await performChatCompletion(messages, "sonar-pro", options);
         return {
           content: [{ type: "text", text: result }],
           isError: false,
@@ -253,9 +400,22 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         if (!Array.isArray(args.messages)) {
           throw new Error("Invalid arguments for perplexity_research: 'messages' must be an array");
         }
-        // Invoke the chat completion function with the provided messages using the deep research model
         const messages = args.messages;
-        const result = await performChatCompletion(messages, "sonar-deep-research");
+        const options: any = {};
+        if (args.reasoning_effort) options.reasoning_effort = args.reasoning_effort;
+        else options.reasoning_effort = "high";
+        if (args.search_context_size) options.search_context_size = args.search_context_size;
+        else options.search_context_size = "high";
+        if (args.search_mode) options.search_mode = args.search_mode;
+        else options.search_mode = "web";
+        if (args.max_tokens) options.max_tokens = args.max_tokens;
+        else options.max_tokens = 3000;
+        if (args.search_domain_filter) options.search_domain_filter = args.search_domain_filter;
+        if (args.return_related_questions !== undefined) options.return_related_questions = args.return_related_questions;
+        else options.return_related_questions = true;
+        if (args.return_images !== undefined) options.return_images = args.return_images;
+        else options.return_images = false;
+        const result = await performChatCompletion(messages, "sonar-deep-research", options);
         return {
           content: [{ type: "text", text: result }],
           isError: false,
@@ -265,9 +425,17 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         if (!Array.isArray(args.messages)) {
           throw new Error("Invalid arguments for perplexity_reason: 'messages' must be an array");
         }
-        // Invoke the chat completion function with the provided messages using the reasoning model
         const messages = args.messages;
-        const result = await performChatCompletion(messages, "sonar-reasoning-pro");
+        const options: any = {};
+        if (args.reasoning_effort) options.reasoning_effort = args.reasoning_effort;
+        else options.reasoning_effort = "high";
+        if (args.max_tokens) options.max_tokens = args.max_tokens;
+        else options.max_tokens = 2000;
+        if (args.temperature !== undefined) options.temperature = args.temperature;
+        else options.temperature = 0.2;
+        if (args.search_context_size) options.search_context_size = args.search_context_size;
+        else options.search_context_size = "medium";
+        const result = await performChatCompletion(messages, "sonar-reasoning-pro", options);
         return {
           content: [{ type: "text", text: result }],
           isError: false,
