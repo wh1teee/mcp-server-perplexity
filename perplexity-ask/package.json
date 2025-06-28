@@ -1,6 +1,6 @@
 {
   "name": "mcp-server-perplexity",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Enhanced MCP server with comprehensive Perplexity API parameter support for advanced development assistance",
   "keywords": [
     "ai",
@@ -29,7 +29,8 @@
     "mcp-server-perplexity": "dist/index.js"
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md"
   ],
   "scripts": {
     "build": "tsc && shx chmod +x dist/*.js",
