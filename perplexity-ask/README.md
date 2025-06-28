@@ -34,14 +34,14 @@ Please refer to the official [DeepWiki page](https://deepwiki.com/ppl-ai/modelco
 Clone this repository:
 
 ```bash
-git clone git@github.com:ppl-ai/modelcontextprotocol.git
+git clone git@github.com:wh1teee/mcp-server-perplexity.git
 ```
 
 Navigate to the `perplexity-ask` directory and install the necessary dependencies:
 
 **Using pnpm (recommended):**
 ```bash
-cd modelcontextprotocol/perplexity-ask && pnpm install
+cd mcp-server-perplexity/perplexity-ask && pnpm install
 ```
 
 **Installing pnpm (if not already installed):**
@@ -146,7 +146,7 @@ Currently, the search parameters used are the default ones. You can modify any s
 
 ### Troubleshooting 
 
-The Claude documentation provides an excellent [troubleshooting guide](https://modelcontextprotocol.io/docs/tools/debugging) you can refer to. However, you can still reach out to us at api@perplexity.ai for any additional support or [file a bug](https://github.com/ppl-ai/api-discussion/issues). 
+The Claude documentation provides an excellent [troubleshooting guide](https://modelcontextprotocol.io/docs/tools/debugging) you can refer to. However, you can still reach out to us at api@perplexity.ai for any additional support or [file a bug](https://github.com/wh1teee/mcp-server-perplexity/issues). 
 
 
 # Cursor integration
