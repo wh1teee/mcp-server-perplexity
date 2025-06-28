@@ -355,7 +355,7 @@ async function performChatCompletion(
 // Initialize the server with tool metadata and capabilities
 const server = new Server(
   {
-    name: "example-servers/perplexity-ask",
+    name: "mcp-server-perplexity",
     version: "0.1.0",
   },
   {
